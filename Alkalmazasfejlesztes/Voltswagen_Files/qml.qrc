@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>MainForm.qml</file>
+        <file>images/robonautlogo.png</file>
+        <file>images/robonautlogo2.png</file>
+    </qresource>
+</RCC>
