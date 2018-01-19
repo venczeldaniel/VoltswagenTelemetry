@@ -2,6 +2,8 @@
 #include <QDebug>
 #include "Communication.h"
 
+quint32 packetlength = 0;
+
 Communication::Communication()
     : receiveStream(nullptr), currentMessageSize(0)
 {
@@ -61,7 +63,10 @@ void Communication::dataReceived()
         // Nem jött még meg az egész csomag.
         return;
     }
-
+    packetlength = currentMessageSize;
+    qDebug() << "Full msg, Size: ";
+    qDebug() << currentMessageSize;
+    qDebug() << "\n";
     /* Jelezzük, hogy van új adat. Amit átadunk, az az id és méret utáni adattartalom.
      * Tömb esetében a QVector úgy szerializálja ki magát, hogy abban benne van a méret is. */
     emit dataReady(inStream);

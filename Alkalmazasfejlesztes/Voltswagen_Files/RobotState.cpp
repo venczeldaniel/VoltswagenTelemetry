@@ -1,7 +1,8 @@
 #include <QDebug>
 #include "RobotState.h"
+#include "Communication/Communication.h"
 
-
+extern quint32 packetlength;
 
 std::map<int,QString> RobotState::statusNames;
 std::map<int,QString> RobotState::patternNames;
@@ -10,6 +11,9 @@ RobotState::RobotState()
 {
     initStatusNames();
     initPatternNames();
+    _status = Status::StoppedState;
+    _lineposition = 0;
+    _pattern = LinePattern::NoLine;
 }
 //Konstruktor
 RobotState::RobotState(Status status, LinePattern pattern, float position)
@@ -72,29 +76,42 @@ void RobotState::WriteTo(QDataStream& stream) const
 void RobotState::ReadFrom(QDataStream& stream)
 {
     quint8 tempQuint8;
+    quint32 tempQuint32;
+    float tempFloat;
 
-    MessageID localID;
-    stream >> tempQuint8;
-    localID = (MessageID) tempQuint8;
-    switch(localID)
+    for(int i=0 ; i < packetlength; i+= 8)
     {
-        case MessageID::CarState    :
+        qDebug() << "ID: ";
+        MessageID localID;
+        stream >> tempQuint32;
+        localID = (MessageID) tempQuint32;
+        qDebug() << tempQuint32;
+
+        switch(localID)
         {
-            stream >> tempQuint8;
-            _status = (Status) tempQuint8;
-            break;
-        }
-        case MessageID::LinePattern :
-        {
-            stream >> tempQuint8;
-            break;
-        }
-        case MessageID::LinePosition    :
-        {
-            stream >> tempQuint8;
-            break;
+            case MessageID::CarState    :
+            {
+                stream >> tempQuint32;
+                _status = (Status) tempQuint32;
+                qDebug() << "State: ";
+                qDebug() << tempQuint32;
+                break;
+            }
+            case MessageID::LinePattern :
+            {
+                stream >> tempQuint32;
+                _pattern = (LinePattern) tempQuint32;
+                break;
+            }
+            case MessageID::LinePosition    :
+            {
+                stream >> tempQuint32;
+                _lineposition = tempQuint32;
+                break;
+            }
         }
     }
+    qDebug() << "Beolvasás sikeres!";
 }
 // RobotState-ről másolatot visszaadó fv.
 void RobotState::CopyFrom(const RobotState &other)
